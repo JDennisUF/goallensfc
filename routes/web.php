@@ -1,11 +1,12 @@
 <?php
 
+use App\Http\Controllers\MatchController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [MatchController::class, 'index']);
+Route::get('/leagues', [MatchController::class, 'fetchLeagues']);
+Route::get('/teams', [MatchController::class, 'fetchTeams']);
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -17,4 +18,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
