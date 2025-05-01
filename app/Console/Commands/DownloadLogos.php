@@ -13,9 +13,9 @@ class DownloadLogos extends Command
 
     public function handle()
     {
-        $teams = $this->getTeams();
+        $this->getTeams();
 
-        // $leagues = $this->getLeagues();
+        // $this->getLeagues();
 
         $this->info('Logos downloaded successfully.');
     }
