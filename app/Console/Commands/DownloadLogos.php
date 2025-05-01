@@ -40,7 +40,6 @@ class DownloadLogos extends Command
         foreach ($leagues as $league) {
             if (isset($league['league']['logo'])) {
                 $imageUrl = $league['league']['logo'];
-                logger()->info('Downloading league logo: ' . $imageUrl);
                 $id = $league['league']['id'];
                 $this->saveImage($imageUrl, public_path("logos/leagues/{$id}.png"));
             }
@@ -62,12 +61,10 @@ class DownloadLogos extends Command
     }
     private function getHttpResponse($url): array
     {
-        logger()->info('Fetching data from API: ' . $url);
         $response = Http::withHeaders([
             'x-rapidapi-host' => env('FOOTBALL_API_HOST'),
             'x-rapidapi-key' => env('FOOTBALL_API_KEY'),
         ])->get($url);
-        logger()->info('API response status: ' . $response->status());
         if ($response->successful()) {
             return $response->json();
         } else {
