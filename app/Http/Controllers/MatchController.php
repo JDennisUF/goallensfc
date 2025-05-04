@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use App\Helpers\LogoHelper;
 
 class MatchController extends Controller
 {
@@ -22,9 +23,6 @@ class MatchController extends Controller
                 ? $response->json()['response'] ?? []
                 : [];
 
-            // usort($leagueData, function ($a, $b) {
-            //     return strcmp($a['id'], $b['id']);
-            // });
         } catch (\Exception $e) {
             Log::error('Error fetching leagues: ' . $e->getMessage());
             $leagues = [];
@@ -46,10 +44,20 @@ class MatchController extends Controller
             $leagues = $response->successful()
                 ? $response->json()['response'] ?? []
                 : [];
+            $leagues = array_map(function ($league) {
+                return [
+                    'id' => $league['league']['id'],
+                    'name' => $league['league']['name'],
+                    'logo' => $league['league']['logo'],
+                    'country' => $league['country'],
+                    'season' => $league['seasons'][0]['year'] ?? null,
+                ];
+            }, $leagues);
 
-            // usort($leagueData, function ($a, $b) {
-            //     return strcmp($a['id'], $b['id']);
-            // });
+            $leagues = LogoHelper::addLeagueLogos(
+                $leagues,
+            );
+
         } catch (\Exception $e) {
             Log::error('Error fetching leagues: ' . $e->getMessage());
             $leagues = [];
@@ -59,7 +67,7 @@ class MatchController extends Controller
     }
     public function fetchTeams(): View
     {
-        $apiUrl = env('FOOTBALL_API_URL') . "/teams?league=" . config('constants.LEAGUE_ID_MLS') . "&season=2025";
+        $apiUrl = env('FOOTBALL_API_URL') . "/teams?league=" . config('constants.LEAGUE_ID_MLS') . "&season=2024";
 
         try {
             $response = Http::withHeaders([
@@ -70,11 +78,19 @@ class MatchController extends Controller
             $teams = $response->successful()
                 ? $response->json()['response'] ?? []
                 : [];
+            $teams = array_map(function ($team) {
+                return [
+                    'id' => $team['team']['id'],
+                    'name' => $team['team']['name'],
+                    'logo' => $team['team']['logo'],
+                    'country' => $team['team']['country'],
+                    'national' => $team['team']['national'],
+                ];
+            }, $teams);
 
-            Log::info('Fetched teams: ', [
-                'status' => $response->status(),
-                'team count' => count($teams),
-            ]);
+            $teams = LogoHelper::addTeamLogos(
+                $teams,
+            );
         } catch (\Exception $e) {
             Log::error('Error fetching leagues: ' . $e->getMessage());
             $teams = [];

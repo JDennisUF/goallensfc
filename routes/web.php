@@ -1,8 +1,14 @@
 <?php
 
+use App\Http\Controllers\FavoriteTeamController;
 use App\Http\Controllers\MatchController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/favorites', [FavoriteTeamController::class, 'index'])->middleware(['auth']);
+Route::post('/favorites', [FavoriteTeamController::class, 'store'])->middleware(['auth']);
+Route::delete('/favorites/{id}', [FavoriteTeamController::class, 'destroy'])->middleware(['auth']);
+
 
 Route::get('/', [MatchController::class, 'index']);
 Route::get('/leagues', [MatchController::class, 'fetchLeagues']);
