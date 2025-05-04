@@ -15,11 +15,13 @@ class League extends Model
         'country',
         'season',
         'type',
+        'is_active'
     ];
 
     public function teams()
     {
-        return $this->hasMany(Team::class);
+        return $this->belongsToMany(Team::class, 'league_team', 'league_id', 'team_id')
+            ->withTimestamps();
     }
     public function favoriteTeamUsers()
     {

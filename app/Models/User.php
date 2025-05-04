@@ -50,5 +50,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Team::class, 'favorite_team_user');
     }
+    public function usersWhoFavorited()
+    {
+        return $this->belongsToMany(User::class, 'favorite_team_user');
+    }
 
 }

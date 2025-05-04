@@ -47,9 +47,7 @@ class FetchTeams extends Command
                 foreach ($teams as $teamData) {
                     $team = $teamData['team'];
                     $country = $team['country'] ?? null;
-                    logger('country: ' . $country);
-                    logger('id:' . $team['id']);
-                    Team::updateOrCreate(
+                    $teamRecord = Team::updateOrCreate(
                         ['id' => $team['id']], // Using the API ID as our PK
                         [
                             'name' => $team['name'],
@@ -60,6 +58,8 @@ class FetchTeams extends Command
                             'founded' => $team['founded'] ?? null,
                         ]
                     );
+                    // Attach the team to the league in the league_team pivot table
+                    $teamRecord->leagues()->syncWithoutDetaching([$leagueId]);
                 }
 
                 $this->info('Teams table populated successfully!');

@@ -15,13 +15,15 @@ class FavoriteTeamController extends Controller
         // and the FavoriteTeamUser model to fetch user's favorite teams
 
         // Fetch all leagues
-        $leagues = League::first();
+        $leagues = League::where('is_active', true)
+            ->orderBy('name', 'asc')
+            ->get();
+        logger('request', $request->all());
 
         // Fetch teams for the selected league
         $teams = [];
         if ($request->has('league_id')) {
-            logger('loading teams');
-            $teams = League::find($request->league_id)->teams;
+            $teams = League::find($request->league_id)->teams->sortBy('name') ?? [];
         }
 
         // Fetch user's favorite team IDs
@@ -29,21 +31,35 @@ class FavoriteTeamController extends Controller
             ->pluck('team_id')
             ->toArray();
 
-        logger('leagues: ', $leagues->toArray());
-
-
         return view('favorites.index', compact('leagues', 'teams', 'favoriteTeamIds'));
     }
 
     public function store(Request $request)
     {
-        // Later: Save favorite team to DB
-        return back()->with('success', 'Team added to favorites!');
+        $userId = auth()->id();
+        logger('request', $request->all());
+
+        // Sync the user's favorite teams with the selected teams
+        $selectedTeamIds = $request->input('favorites', []);
+        foreach ($selectedTeamIds as $teamId) {
+            FavoriteTeamUser::create([
+                'user_id' => $userId,
+                'team_id' => $teamId,
+            ]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Favorites updated successfully!']);
     }
 
-    public function destroy($id)
+    public function destroy($teamId)
     {
-        // Later: Remove team from user's favorites
-        return back()->with('success', 'Team removed.');
+        $userId = auth()->id();
+
+        // Delete the favorite_team_user record
+        FavoriteTeamUser::where('user_id', $userId)
+            ->where('team_id', $teamId)
+            ->delete();
+
+        return response()->json(['success' => true]);
     }
 }

@@ -23,5 +23,10 @@ class Team extends Model
     {
         return $this->belongsToMany(User::class, 'favorite_team_user');
     }
+    public function leagues()
+    {
+        return $this->belongsToMany(League::class, 'league_team', 'team_id', 'league_id')
+            ->withTimestamps();
+    }
 
 }
