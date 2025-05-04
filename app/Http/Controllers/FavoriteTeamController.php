@@ -23,7 +23,6 @@ class FavoriteTeamController extends Controller
             logger('loading teams');
             $teams = League::find($request->league_id)->teams;
         }
-        logger('leagues: ' . $leagues->count());
 
         // Fetch user's favorite team IDs
         $favoriteTeamIds = FavoriteTeamUser::where('user_id', auth()->id())
