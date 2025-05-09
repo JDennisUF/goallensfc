@@ -2,15 +2,22 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 
 class LogoHelper
 {
+    public static function addTeamLogosForCollection(Collection $teams): Collection
+    {
+        $teamsArray = $teams->toArray();
+        $processedTeamsArray = self::addLocalLogos($teamsArray, 'teams');
 
-    public static function addTeamLogos(
-        array $teams,
-    ): array {
+        return collect($processedTeamsArray);
+    }
+
+    public static function addTeamLogos(array $teams): array
+    {
 
         return self::addLocalLogos(
             $teams,
@@ -36,7 +43,7 @@ class LogoHelper
         try {
             foreach ($items as &$item) {
                 $localPath = public_path("logos/{$directory}/{$item['id']}.png");
-                $item['local_logo'] = file_exists($localPath)
+                $item['logo_url'] = file_exists($localPath)
                     ? asset("logos/{$directory}/{$item['id']}.png")
                     : self::downloadAndSaveLogo($item['logo'], $localPath, $directory, $item['id']);
                 ;

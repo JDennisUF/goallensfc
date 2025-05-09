@@ -12,7 +12,7 @@
         @forelse ($leagues as $league)
             <li>
                 @if (isset($league['logo']))
-                    <img src="{{ $league['local_logo'] }}" alt="{{ $league['name'] ?? 'League Logo' }}"
+                    <img src="{{ $league['logo_url'] }}" alt="{{ $league['name'] ?? 'League Logo' }}"
                         style="width: 50px; height: 50px;" loading="lazy"
                         onerror="this.onerror=null; this.src='/images/deflatedball.png';">
                 @endif

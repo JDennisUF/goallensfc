@@ -47,7 +47,7 @@ class DownloadLogos extends Command
     }
     protected function getTeams(): void
     {
-        $apiUrl = env('FOOTBALL_API_URL') . "/teams?league=78&season=2024";
+        $apiUrl = env('FOOTBALL_API_URL') . "/teams?league=262&season=2024";
 
         $response = $this->getHttpResponse($apiUrl);
 

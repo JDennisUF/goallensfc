@@ -1,7 +1,7 @@
 <!-- filepath: /home/jasondennis/code/goallensfc/resources/views/favorites/index.blade.php -->
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold text-green-800">⭐ Favorite Teams</h2>
+        <h2 class="text-xl font-semibold text-green-800">⭐ Select Your Favorite Teams</h2>
     </x-slot>
 
     <div class="p-6 bg-white rounded shadow text-gray-800">
@@ -25,20 +25,20 @@
                 @csrf
                 @method('POST')
 
-                <ul class="list-style: none; padding-left: 0;">
+                <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach ($teams as $team)
-                        <li style="margin-bottom: 16px; display: flex; align-items: center;">
-                            <!-- fave team checkbox -->
-                            <input type="checkbox" name="favorites[]" value="{{ $team->id }}"
-                                {{ in_array($team->id, $favoriteTeamIds) ? 'checked' : '' }}
-                                onchange="handleFavoriteChange(this, {{ $team->id }})"
-                                style="width: 24px; height: 24px; margin-right: 16px;">
-                            <!-- team logo -->
-                            <img src="{{ $team->logo_url }}" alt="Team Logo Missing"
-                                style="width: 48px; height: 48px; border-radius: 8px; margin-right: 16px;" loading="lazy"
+                        <li class="flex items-center space-x-4">
+                            <!-- Favorite team checkbox -->
+                            <input type="checkbox" name="favorites[]" value="{{ $team['id'] }}" 
+                                {{ in_array($team['id'], $favoriteTeamIds) ? 'checked' : '' }} 
+                                onchange="handleFavoriteChange(this, {{ $team['id'] }})"
+                                class="w-6 h-6">
+                            <!-- Team logo -->
+                            <img src="{{ $team['logo_url'] }}" alt="Team Logo Missing"
+                                class="w-12 h-12 rounded-lg" loading="lazy"
                                 onerror="this.onerror=null; this.src='/images/deflatedball.png';">
-                            <!-- team name -->
-                            <span style="font-size: 18px; font-weight: bold; color: #2d3748;">{{ $team->name }}</span>
+                            <!-- Team name -->
+                            <span class="text-lg font-bold text-gray-800">{{ $team['name'] }}</span>
                         </li>
                     @endforeach
                 </ul>
@@ -48,8 +48,14 @@
         @endif
     </div>
     <script>
+        let selectedLeagueId = document.getElementById('league').value;
+
+        document.getElementById('league').addEventListener('change', function () {
+            selectedLeagueId = this.value;
+        });
+
         function handleFavoriteChange(checkbox, teamId) {
-            const url = checkbox.checked ? '/favorites' : `/favorites/${teamId}`;
+            const url = checkbox.checked ? '/favorites' : `/favorites/${teamId}-${selectedLeagueId}`;
             const method = checkbox.checked ? 'POST' : 'DELETE';
 
             fetch(url, {
@@ -59,6 +65,7 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
+                    league_id: selectedLeagueId,
                     favorites: checkbox.checked ? [teamId] : null,
                 }),
             })

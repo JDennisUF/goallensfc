@@ -19,6 +19,10 @@ class Team extends Model
         'founded'
     ];
 
+    protected $appends = [
+        'logo_url',
+    ];
+
     public function usersWhoFavorited()
     {
         return $this->belongsToMany(User::class, 'favorite_team_user');
@@ -27,6 +31,12 @@ class Team extends Model
     {
         return $this->belongsToMany(League::class, 'league_team', 'team_id', 'league_id')
             ->withTimestamps();
+    }
+    public function getLogoUrlAttribute($value)
+    {
+        // hacky, might not work in all flows.  Make sure
+        // it does not interfere with storing logos from teams/leagues
+        return 'http://127.0.0.1:8000/logos/teams/' . $this->id . '.png';
     }
 
 }

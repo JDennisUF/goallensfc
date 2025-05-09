@@ -88,9 +88,8 @@ class MatchController extends Controller
                 ];
             }, $teams);
 
-            $teams = LogoHelper::addTeamLogos(
-                $teams,
-            );
+            $teams = LogoHelper::addTeamLogos($teams);
+
         } catch (\Exception $e) {
             Log::error('Error fetching leagues: ' . $e->getMessage());
             $teams = [];

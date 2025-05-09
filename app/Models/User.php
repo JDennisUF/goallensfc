@@ -48,7 +48,9 @@ class User extends Authenticatable
 
     public function favoriteTeams()
     {
-        return $this->belongsToMany(Team::class, 'favorite_team_user');
+        return $this->belongsToMany(Team::class, 'favorite_team_user')
+            ->withPivot('league_id')
+            ->withTimestamps();
     }
     public function usersWhoFavorited()
     {
