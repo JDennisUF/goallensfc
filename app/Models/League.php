@@ -9,10 +9,10 @@ class League extends Model
     protected $table = 'leagues';
 
     protected $fillable = [
-        'id',
         'name',
         'logo_url',
         'country',
+        'code',
         'season',
         'type',
         'is_active'

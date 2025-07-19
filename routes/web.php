@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\FavoriteTeamController;
 use App\Http\Controllers\FavoriteTeamsResultsController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LeagueGamesController;
 use App\Http\Controllers\MatchController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -11,14 +13,15 @@ Route::post('/favorites', [FavoriteTeamController::class, 'store'])->middleware(
 Route::delete('/favorites/{teamid}-{leagueid}', [FavoriteTeamController::class, 'destroy'])->middleware(['auth']);
 
 Route::get('/results', [FavoriteTeamsResultsController::class, 'index'])->middleware(['auth']);
-Route::get('/', [MatchController::class, 'index']);
-Route::get('/leagues', [MatchController::class, 'fetchLeagues']);
-Route::get('/teams', [MatchController::class, 'fetchTeams']);
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/leagues', [MatchController::class, 'fetchLeagues'])->name('leagues');
+Route::get('/teams', [MatchController::class, 'fetchTeams'])->name('teams');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/league-games', [LeagueGamesController::class, 'index'])->middleware(['auth', 'verified'])->name('league-games');
+
+// created by artisan
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

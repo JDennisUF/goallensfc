@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -65,36 +66,57 @@ class MatchController extends Controller
 
         return view('leagues', ['leagues' => $leagues]);
     }
-    public function fetchTeams(): View
+    public function fetchTeams(Request $request): View
     {
-        $apiUrl = env('FOOTBALL_API_URL') . "/teams?league=" . config('constants.LEAGUE_ID_MLS') . "&season=2024";
+        // Get all leagues for the selector
+        $leagues = \App\Models\League::where('is_active', true)
+            ->orderBy('name')
+            ->get();
 
-        try {
-            $response = Http::withHeaders([
-                'x-rapidapi-host' => env('FOOTBALL_API_HOST'),
-                'x-rapidapi-key' => env('FOOTBALL_API_KEY'),
-            ])->get($apiUrl);
+        $teams = [];
+        $selectedLeague = null;
 
-            $teams = $response->successful()
-                ? $response->json()['response'] ?? []
-                : [];
-            $teams = array_map(function ($team) {
-                return [
-                    'id' => $team['team']['id'],
-                    'name' => $team['team']['name'],
-                    'logo' => $team['team']['logo'],
-                    'country' => $team['team']['country'],
-                    'national' => $team['team']['national'],
-                ];
-            }, $teams);
+        if ($request->filled('league_id')) {
+            $leagueId = $request->input('league_id');
+            $selectedLeague = $leagues->where('id', $leagueId)->first();
+            
+            // Get teams from database first
+            if ($selectedLeague) {
+                $teams = $selectedLeague->teams()->get()->toArray();
+                $teams = LogoHelper::addTeamLogos($teams);
+            }
+            
+            // If no teams in database, try to fetch from API
+            if (empty($teams)) {
+                $apiUrl = env('FOOTBALL_API_URL') . "/teams?league={$leagueId}&season=2024";
 
-            $teams = LogoHelper::addTeamLogos($teams);
+                try {
+                    $response = Http::withHeaders([
+                        'x-rapidapi-host' => env('FOOTBALL_API_HOST'),
+                        'x-rapidapi-key' => env('FOOTBALL_API_KEY'),
+                    ])->get($apiUrl);
 
-        } catch (\Exception $e) {
-            Log::error('Error fetching leagues: ' . $e->getMessage());
-            $teams = [];
+                    if ($response->successful()) {
+                        $apiTeams = $response->json()['response'] ?? [];
+                        $teams = array_map(function ($team) {
+                            return [
+                                'id' => $team['team']['id'],
+                                'name' => $team['team']['name'],
+                                'logo' => $team['team']['logo'],
+                                'country' => $team['team']['country'],
+                                'national' => $team['team']['national'],
+                            ];
+                        }, $apiTeams);
+
+                        $teams = LogoHelper::addTeamLogos($teams);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Error fetching teams: ' . $e->getMessage());
+                    $teams = [];
+                }
+            }
         }
 
-        return view('teams', ['teams' => $teams]);
+        return view('teams', compact('leagues', 'teams', 'selectedLeague'));
     }
 }

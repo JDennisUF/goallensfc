@@ -5,15 +5,28 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
+                    <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
+                        <span class="text-2xl">⚽</span>
+                        <span class="text-lg font-bold text-green-600">GoalLensFC</span>
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Home') }}
+                        {{ __('Dashboard') }}
+                    </x-nav-link>
+                    <x-nav-link :href="url('/favorites')" :active="request()->is('favorites')">
+                        {{ __('⭐ Favorites') }}
+                    </x-nav-link>
+                    <x-nav-link :href="url('/results')" :active="request()->is('results')">
+                        {{ __('📊 Results') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('leagues')" :active="request()->routeIs('leagues')">
+                        {{ __('🏆 Leagues') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('teams')" :active="request()->routeIs('teams')">
+                        {{ __('👥 Teams') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -69,6 +82,18 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="url('/favorites')" :active="request()->is('favorites')">
+                {{ __('⭐ Favorites') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="url('/results')" :active="request()->is('results')">
+                {{ __('📊 Results') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('leagues')" :active="request()->routeIs('leagues')">
+                {{ __('🏆 Leagues') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('teams')" :active="request()->routeIs('teams')">
+                {{ __('👥 Teams') }}
             </x-responsive-nav-link>
         </div>
 
