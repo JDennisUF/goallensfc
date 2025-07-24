@@ -4,16 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\League;
 use App\Services\ApiFootballService;
+use App\Services\CacheService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class HomeController extends Controller
 {
     protected $apiFootballService;
+    protected $cacheService;
 
-    public function __construct(ApiFootballService $apiFootballService)
+    public function __construct(ApiFootballService $apiFootballService, CacheService $cacheService)
     {
         $this->apiFootballService = $apiFootballService;
+        $this->cacheService = $cacheService;
     }
 
     public function index(): View
@@ -30,21 +33,30 @@ class HomeController extends Controller
         // Get user's favorite teams
         $favoriteTeams = Auth::user()->favoriteTeams()->take(6)->get();
         
-        // Get recent matches for favorite teams
-        $recentMatches = collect();
+        // Get unique leagues for the user's favorite teams
+        $favoriteLeagues = collect();
         foreach ($favoriteTeams as $team) {
-            $matches = $this->apiFootballService->getTeamMatches($team->id, now()->year, 3);
-            if ($matches && isset($matches['response'])) {
-                $recentMatches = $recentMatches->concat(collect($matches['response']));
+            if ($team->pivot && $team->pivot->league_id) {
+                $league = \App\Models\League::find($team->pivot->league_id);
+                if ($league && !$favoriteLeagues->contains('id', $league->id)) {
+                    $favoriteLeagues->push($league);
+                }
             }
         }
         
-        // Sort by date and take most recent
-        $recentMatches = $recentMatches->sortByDesc(function ($match) {
-            return $match['fixture']['date'] ?? '';
-        })->take(10);
+        // Get recent matches for favorite teams using cache service
+        $recentMatches = collect();
+        try {
+            $favoriteTeamIds = $favoriteTeams->pluck('id')->toArray();
+            $matches = $this->cacheService->getMultipleTeamMatches($favoriteTeamIds, 8);
+            $recentMatches = collect($matches);
+        } catch (\Exception $e) {
+            // Log error but don't break the dashboard
+            \Log::error('Error fetching recent matches: ' . $e->getMessage());
+            $recentMatches = collect();
+        }
 
-        return view('home.dashboard', compact('favoriteTeams', 'recentMatches'));
+        return view('home.dashboard', compact('favoriteTeams', 'recentMatches', 'favoriteLeagues'));
     }
 
     private function guestHome(): View

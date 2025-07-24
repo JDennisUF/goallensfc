@@ -65,4 +65,22 @@ class ApiFootballService
 
         return null;
     }
+
+    public function getLeagues($season = null)
+    {
+        $season = $season ?? now()->year;
+
+        $response = Http::withHeaders([
+            'x-rapidapi-key' => $this->apiKey,
+            'x-rapidapi-host' => $this->apiHost,
+        ])->get("{$this->apiUrl}/leagues", [
+            'season' => $season,
+        ]);
+
+        if ($response->successful()) {
+            return $response->json();
+        }
+
+        return null;
+    }
 }

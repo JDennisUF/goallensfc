@@ -13,6 +13,9 @@ Route::post('/favorites', [FavoriteTeamController::class, 'store'])->middleware(
 Route::delete('/favorites/{teamid}-{leagueid}', [FavoriteTeamController::class, 'destroy'])->middleware(['auth']);
 
 Route::get('/results', [FavoriteTeamsResultsController::class, 'index'])->middleware(['auth']);
+Route::get('/game-widget/{fixtureId}', function($fixtureId) {
+    return view('game-widget', ['fixtureId' => $fixtureId]);
+})->middleware(['auth'])->name('game-widget');
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/leagues', [MatchController::class, 'fetchLeagues'])->name('leagues');
 Route::get('/teams', [MatchController::class, 'fetchTeams'])->name('teams');
